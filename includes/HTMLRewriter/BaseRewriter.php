@@ -3,6 +3,7 @@
 namespace MediaWiki\Skin\NORA\HTMLRewriter;
 
 use IContextSource;
+use MediaWiki\Context\RequestContext;
 use MediaWiki\MediaWikiServices;
 use MediaWiki\Page\WikiPageFactory;
 use Parser;
@@ -55,7 +56,7 @@ class BaseRewriter {
 		}
 
 		$attr = $this->buildParserAttributes( $wrapperDiv );
-		return $parserOutput->getText( $attr );
+		return $this->getTextFromParserOutput( $parserOutput, $attr );
 	}
 
 	/**
@@ -71,7 +72,7 @@ class BaseRewriter {
 			$title = Title::newFromText( "AttributeParser" . uniqid() );
 		}
 
-		$wikiPage = WikiPage::factory( $title );
+		$wikiPage = MediaWikiServices::getInstance()->getWikiPageFactory()->newFromTitle( $title );
 		$parserOptions = ParserOptions::newFromContext( $context );
 
 		$options = [
@@ -81,9 +82,8 @@ class BaseRewriter {
 			'unwrap' => true
 		];
 
-		return $this->parser
-			->parse( $wikitext, $wikiPage, $parserOptions )
-			->getText( $options );
+		$parserOutput = $this->parser->parse( $wikitext, $wikiPage, $parserOptions );
+		return $this->getTextFromParserOutput( $parserOutput, $options );
 	}
 
 	/**
@@ -117,4 +117,15 @@ class BaseRewriter {
 			$title->getFullText()
 		);
 	}
+
+	private function getTextFromParserOutput( ParserOutput $parserOutput, $parserOptions = null ): string {
+		if ( version_compare( FARM_VERSION, '1.43', '<' ) ) {
+			return $parserOutput->getText();
+		} else {
+			return $parserOutput->runOutputPipeline(
+				$parserOptions ?? new \MediaWiki\Parser\ParserOptions( RequestContext::getMain()->getUser() )
+			)->getContentHolderText();
+		}
+	}
+
 }

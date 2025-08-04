@@ -18,6 +18,17 @@ class Skin extends SkinMustache {
 	private const DEFAULT_MENU_LI_CLASS = 'navigation-item';
 	private const DEFAULT_MENU_A_CLASS = 'navigation-link';
 
+	public function __construct() {
+		$options = func_get_args()[ 0 ] ?? [];
+
+		if ( version_compare( FARM_VERSION, '1.43', '>=' ) ) {
+			// templateDirectory was overwritten from MW1.43
+			$options[ "templateDirectory" ] = "skins/NORA/templates";
+		}
+
+		parent::__construct( $options );
+	}
+
 	public function getTemplateData(): array {
 		$data = parent::getTemplateData();
 		$rewriter = new Rewriter();

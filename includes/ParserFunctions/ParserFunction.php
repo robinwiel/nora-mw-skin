@@ -2,8 +2,8 @@
 
 namespace MediaWiki\Skin\NORA\ParserFunctions;
 
+use Exception;
 use MediaWiki\Extension\ParserFunctions\ParserFunctions;
-use MWException;
 use Parser;
 
 abstract class ParserFunction extends ParserFunctions {
@@ -19,7 +19,7 @@ abstract class ParserFunction extends ParserFunctions {
 	 *
 	 * @return void
 	 *
-	 * @throws MWException
+	 * @throws Exception
 	 */
 	public static function onParserFirstCallInit( Parser $parser ): void {
 		// MediaWiki expects a callable function, but running it with [ static::class, 'render' ] will not work
